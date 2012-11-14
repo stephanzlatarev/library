@@ -9,12 +9,19 @@ import tdl.TheDigitalLibrary;
 
 public class TheDigitalLibraryCatalogBrowser {
 
+	private boolean isConnected;
 	private TheDigitalLibrary library;
 	private SearchSession session;
 
 	public TheDigitalLibraryCatalogBrowser(TheDigitalLibrary library) {
 		this.library = library;
-		this.library.connect();
+		this.isConnected = false;
+	}
+
+	public void connect() {
+		if (!isConnected) {
+			library.connect();
+		}
 	}
 
 	public Collection<BookTitle> search(String keyword) {
@@ -37,6 +44,9 @@ public class TheDigitalLibraryCatalogBrowser {
 	}
 
 	private final Collection<String> getFirstPageOfHeaders(String keyword) {
+		// make sure we are connected
+		connect();
+
 		session = library.openSearchSession();
 
 		SearchResults search = library.startSearch(session, keyword, 20);
