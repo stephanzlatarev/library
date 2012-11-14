@@ -1,0 +1,40 @@
+Release planning - Library partners with "The Digital Library"
+
+===== creational patterns =====
+* Library offers a catalog browser to "The Digital Library"
+- use singleton and its factory
+- injection via constructor
+- lazy initialization
+- object pool 
+
+===== structural patterns =====
+* The catalog browser of the library can work with local catalog and "The Digital Library"
+- implement against raw interface
+- use a facade to simplify interaction with raw interface
+- (DIP) implement against class ?
+- LendingDesk uses an adapter to 
+- implement against raw interface
+
+* Keep statistics on searches of titles from "The Digital Library" so that the library can optimize own copies
+- use a proxy to decouple client from object
+- do not use proxy and add counting at all possible places with if clauses
+
+===== behavioural patterns =====
+* Library users can reserve expected titles and get book copy via mail service
+- observer
+
+* Reservations are served with returned copies; exception if copy is damaged
+- strategy pattern
+- template method
+
+===== concurrency patterns =====
+* Library is available online and need to become thread-safe
+- thread pool
+- monitor object
+- optimistic locking
+
+
+---- to do ----
+- a change list with cast to specific class even though interface works
+- a change that copies a large method into a separate class and leaves a duplicate
+- 
