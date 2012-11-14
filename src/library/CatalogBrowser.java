@@ -8,22 +8,37 @@ import java.util.HashSet;
  */
 public class CatalogBrowser {
 
-	private Catalog catalog;
+	private Object catalog;
 
 	public CatalogBrowser(Catalog catalog) {
 		this.catalog = catalog;
 	}
 
-	public Collection<BookTitle> search(String keyword) {
-		Collection<BookTitle> result = new HashSet<BookTitle>();
+	public CatalogBrowser(TheDigitalLibraryCatalogBrowser catalog) {
+		this.catalog = catalog;
+	}
 
-		for (BookTitle title: catalog.getTitles()) {
-			if (title.getTitle().contains(keyword)) {
-				result.add(title);
+	public Collection<BookTitle> search(String keyword) {
+		if (catalog instanceof Catalog) {
+			Collection<BookTitle> result = new HashSet<BookTitle>();
+
+			for (BookTitle title: ((Catalog) catalog).getTitles()) {
+				if (title.getTitle().contains(keyword)) {
+					result.add(title);
+				}
+			}
+
+			return result;
+		} else {
+			TheDigitalLibraryCatalogBrowser tdl = (TheDigitalLibraryCatalogBrowser) catalog;
+
+			tdl.connect();
+			try {
+				return tdl.search(keyword);
+			} finally {
+				tdl.disconnect();
 			}
 		}
-
-		return result;
 	}
 
 }
