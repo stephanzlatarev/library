@@ -11,10 +11,12 @@ public class TheDigitalLibraryCatalogBrowser {
 
 	private boolean isConnected;
 	private TheDigitalLibrary library;
+	private SearchSessionPool pool;
 	private SearchSession session;
 
-	public TheDigitalLibraryCatalogBrowser(TheDigitalLibrary library) {
+	public TheDigitalLibraryCatalogBrowser(TheDigitalLibrary library, SearchSessionPool pool) {
 		this.library = library;
+		this.pool = pool;
 		this.isConnected = false;
 	}
 
@@ -24,30 +26,32 @@ public class TheDigitalLibraryCatalogBrowser {
 		}
 	}
 
+	public void disconnect() {
+		if (session != null) {
+			library.closeSearchSession(session);
+		}
+	}
+
 	public Collection<BookTitle> search(String keyword) {
-		try {
-			Collection<BookTitle> result = new ArrayList<BookTitle>();
-			Collection<String> headers = getFirstPageOfHeaders(keyword);
-	
-			while (!headers.isEmpty()) {
-				for (String header: headers) {
-					result.add(constructBookTitle(header));
-				}
-	
-				headers = fetchNextPageOfHeaders();
+		Collection<BookTitle> result = new ArrayList<BookTitle>();
+		Collection<String> headers = getFirstPageOfHeaders(keyword);
+
+		while (!headers.isEmpty()) {
+			for (String header: headers) {
+				result.add(constructBookTitle(header));
 			}
 
-			return result;
-		} finally {
-			closeSearch();
+			headers = fetchNextPageOfHeaders();
 		}
+
+		return result;
 	}
 
 	private final Collection<String> getFirstPageOfHeaders(String keyword) {
 		// make sure we are connected
 		connect();
 
-		session = library.openSearchSession();
+		session = pool.getSearchSession(library);
 
 		SearchResults search = library.startSearch(session, keyword, 20);
 
@@ -68,12 +72,6 @@ public class TheDigitalLibraryCatalogBrowser {
 		}
 
 		return page;
-	}
-
-	private final void closeSearch() {
-		if (session != null) {
-			library.closeSearchSession(session);
-		}
 	}
 
 	private final BookTitle constructBookTitle(String bookHeading) {
