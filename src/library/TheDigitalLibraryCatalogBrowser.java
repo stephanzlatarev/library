@@ -7,7 +7,7 @@ import tdl.SearchResults;
 import tdl.SearchSession;
 import tdl.TheDigitalLibrary;
 
-public class TheDigitalLibraryCatalogBrowser {
+public class TheDigitalLibraryCatalogBrowser extends Catalog {
 
 	private boolean isConnected;
 	private TheDigitalLibrary library;
@@ -30,6 +30,15 @@ public class TheDigitalLibraryCatalogBrowser {
 		if (session != null) {
 			library.closeSearchSession(session);
 		}
+	}
+
+	public void addTitle(BookTitle title) {
+		throw new IllegalStateException("The Digital Library catalog is read-only!");
+	}
+
+	public Collection<BookTitle> getTitles() {
+		// Search for all titles
+		return search("");
 	}
 
 	public Collection<BookTitle> search(String keyword) {
