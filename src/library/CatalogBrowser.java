@@ -10,18 +10,22 @@ public class CatalogBrowser {
 
 	private CatalogSearch[] catalogs;
 
+	private static Object lock = new Object();
+
 	public CatalogBrowser(CatalogSearch... catalogs) {
 		this.catalogs = catalogs;
 	}
 
 	public Collection<BookTitle> search(String keyword) {
-		Collection<BookTitle> result = new HashSet<BookTitle>();
+	  synchronized (lock) {
+	    Collection<BookTitle> result = new HashSet<BookTitle>();
 
-		for (CatalogSearch catalog: catalogs) {
-			result.addAll(catalog.search(keyword));
-		}
+	    for (CatalogSearch catalog: catalogs) {
+	      result.addAll(catalog.search(keyword));
+	    }
 
-		return result;
+	    return result;
+	  }
 	}
 
 }
