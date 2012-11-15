@@ -15,7 +15,7 @@ public class SearchSessionPool {
 		this.pool = new LinkedList<SearchSession>();
 	}
 
-	public SearchSession getSearchSession(TheDigitalLibrary library) {
+	public synchronized SearchSession getSearchSession(TheDigitalLibrary library) {
 		SearchSession session = pool.poll();
 
 		if (session != null) {
@@ -25,7 +25,7 @@ public class SearchSessionPool {
 		}
 	}
 
-	public void returnToPool(SearchSession session) {
+	public synchronized void returnToPool(SearchSession session) {
 		if (pool.size() < limit) {
 			pool.add(session);
 		}
