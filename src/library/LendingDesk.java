@@ -82,7 +82,8 @@ public class LendingDesk implements BookAvailabilityListener {
 	public void returnCopy(BookCopy book) {
 		if (loans.containsKey(book)) {
 			loans.remove(book);
-			book.setStatus(BookCopy.Status.Available);
+
+			BookReturnStrategy.getStrategy(library, book).returnBookCopy(book);
 		}
 	}
 
