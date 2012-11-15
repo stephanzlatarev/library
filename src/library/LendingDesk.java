@@ -7,7 +7,7 @@ import java.util.HashMap;
 /**
  * The lending desk of the library handles the book lending and return procedures
  */
-public class LendingDesk {
+public class LendingDesk implements Observer {
 
 	private Library library;
 	private MailService mailService;
@@ -17,16 +17,16 @@ public class LendingDesk {
 
 	public LendingDesk(Library library, MailService mailService) {
 		this.library = library;
-		this.mailService = mailService;
+		this.library.registerObserver(this);
 
-		library.desk = this;
+		this.mailService = mailService;
 	}
 
 	public void reserveCopy(BookTitle title, LibraryUser user) {
 		reservations.add(new Reservation(title, user));
 	}
 
-	void processAvailableCopy(BookCopy copy) {
+	public void notifyOnAvailableCopy(BookCopy copy) {
 		Reservation processedReservation = null;
 
 		for (Reservation reservation: reservations) {
