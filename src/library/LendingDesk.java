@@ -1,5 +1,6 @@
 package library;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -9,10 +10,46 @@ import java.util.HashMap;
 public class LendingDesk {
 
 	private Library library;
-	private HashMap<BookCopy, Loan> loans = new HashMap<BookCopy, Loan>();
+	private MailService mailService;
 
-	public LendingDesk(Library library) {
+	private HashMap<BookCopy, Loan> loans = new HashMap<BookCopy, Loan>();
+	private ArrayList<Reservation> reservations = new ArrayList<Reservation>();
+
+	public LendingDesk(Library library, MailService mailService) {
 		this.library = library;
+		this.mailService = mailService;
+
+		library.desk = this;
+	}
+
+	public void reserveCopy(BookTitle title, LibraryUser user) {
+		reservations.add(new Reservation(title, user));
+	}
+
+	void processAvailableCopy(BookCopy copy) {
+		Reservation processedReservation = null;
+
+		for (Reservation reservation: reservations) {
+			if (reservation.getTitle().equals(copy.getTitle())) {
+				processedReservation = reservation;
+				break;
+			}
+		}
+
+		if (processedReservation != null) {
+			// lend the copy to the waiting user
+			Calendar dueDate = Calendar.getInstance();
+			dueDate.add(Calendar.MONTH, 1);
+
+			copy.setStatus(BookCopy.Status.Lent);
+			loans.put(copy, new Loan(copy, processedReservation.getLibraryUser(), dueDate.getTime()));
+
+			// send the copy via mail service
+			mailService.deliverBookTo(copy, processedReservation.getLibraryUser());
+
+			// set reservation to completed
+			reservations.remove(processedReservation);
+		}
 	}
 
 	/**

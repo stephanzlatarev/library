@@ -9,6 +9,8 @@ public class Library {
 	private Catalog catalog;
 	private Collection<BookCopy> books;
 
+	LendingDesk desk;
+
 	public Library() {
 		this.catalog = new Catalog();
 		this.books = new HashSet<BookCopy>();
@@ -22,6 +24,8 @@ public class Library {
 		book.setStatus(BookCopy.Status.Available);
 		books.add(book);
 		catalog.addTitle(book.getTitle());
+
+		desk.processAvailableCopy(book);
 	}
 
 	public Collection<BookCopy> getBooks() {
