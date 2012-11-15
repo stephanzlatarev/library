@@ -7,7 +7,7 @@ import java.util.HashMap;
 /**
  * The lending desk of the library handles the book lending and return procedures
  */
-public class LendingDesk implements Observer {
+public class LendingDesk implements BookAvailabilityListener {
 
 	private Library library;
 	private MailService mailService;
@@ -17,7 +17,7 @@ public class LendingDesk implements Observer {
 
 	public LendingDesk(Library library, MailService mailService) {
 		this.library = library;
-		this.library.registerObserver(this);
+		this.library.registerListener(this);
 
 		this.mailService = mailService;
 	}
@@ -26,7 +26,7 @@ public class LendingDesk implements Observer {
 		reservations.add(new Reservation(title, user));
 	}
 
-	public void notifyOnAvailableCopy(BookCopy copy) {
+	public void onAvailableCopy(BookCopy copy) {
 		Reservation processedReservation = null;
 
 		for (Reservation reservation: reservations) {
@@ -37,15 +37,10 @@ public class LendingDesk implements Observer {
 		}
 
 		if (processedReservation != null) {
-			// lend the copy to the waiting user
-			Calendar dueDate = Calendar.getInstance();
-			dueDate.add(Calendar.MONTH, 1);
+			LibraryUser user = processedReservation.getLibraryUser();
 
-			copy.setStatus(BookCopy.Status.Lent);
-			loans.put(copy, new Loan(copy, processedReservation.getLibraryUser(), dueDate.getTime()));
-
-			// send the copy via mail service
-			mailService.deliverBookTo(copy, processedReservation.getLibraryUser());
+			lendCopy(copy, user);
+			mailService.deliverBookTo(copy, user);
 
 			// set reservation to completed
 			reservations.remove(processedReservation);
@@ -61,17 +56,22 @@ public class LendingDesk implements Observer {
 	public BookCopy lendCopy(BookTitle title, LibraryUser user) {
 		for (BookCopy copy: library.getBooks()) {
 			if (copy.getTitle().equals(title) && (copy.getStatus() == BookCopy.Status.Available)) {
-				Calendar dueDate = Calendar.getInstance();
-				dueDate.add(Calendar.MONTH, 1);
-
-				copy.setStatus(BookCopy.Status.Lent);
-				loans.put(copy, new Loan(copy, user, dueDate.getTime()));
-				return copy;
+				return lendCopy(copy, user);
 			}
 		}
 
 		// no copy of the book title is available
 		return null;
+	}
+
+	private BookCopy lendCopy(BookCopy copy, LibraryUser user) {
+		Calendar dueDate = Calendar.getInstance();
+		dueDate.add(Calendar.MONTH, 1);
+
+		copy.setStatus(BookCopy.Status.Lent);
+		loans.put(copy, new Loan(copy, user, dueDate.getTime()));
+
+		return copy;
 	}
 
 	/**
